@@ -99,8 +99,8 @@ func (p Path) MkdirAll() xerrors.Error {
 	}
 
 	// set ownership and permissions
-	if errx := p.Chown(); errx != nil {
-		return errx
+	if xerr := p.Chown(); xerr != nil {
+		return xerr
 	}
 	return p.Chmod()
 }
@@ -115,8 +115,8 @@ func (p Path) OpenFile(flags int, createParent bool) (*os.File, xerrors.Error) {
 			Owner:   p.Owner,
 			FSPath:  path.Dir(p.FSPath),
 		}
-		if errx := parent.MkdirAll(); errx != nil {
-			return nil, errx
+		if xerr := parent.MkdirAll(); xerr != nil {
+			return nil, xerr
 		}
 	}
 
@@ -132,13 +132,13 @@ func (p Path) OpenFile(flags int, createParent bool) (*os.File, xerrors.Error) {
 	}
 
 	// set ownership and permissions
-	if errx := p.Chown(); errx != nil {
+	if xerr := p.Chown(); xerr != nil {
 		file.Close()
-		return nil, errx
+		return nil, xerr
 	}
-	if errx := p.Chmod(); errx != nil {
+	if xerr := p.Chmod(); xerr != nil {
 		file.Close()
-		return nil, errx
+		return nil, xerr
 	}
 	return file, nil
 }
