@@ -1,7 +1,6 @@
 package types
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path"
@@ -232,7 +231,7 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 //   - [PathError]
 //   - [PathOpenFileError]
 //   - [PathWriteError]
-func (p Path) WriteFile(ctx context.Context, data []byte, overwrite bool) xerrors.Error {
+func (p Path) WriteFile(data []byte, overwrite bool) xerrors.Error {
 	flags := os.O_CREATE | os.O_RDWR
 	if overwrite {
 		flags |= os.O_TRUNC

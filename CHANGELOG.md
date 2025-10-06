@@ -4,7 +4,7 @@
 
 No unreleased changes
 
-## v0.3.1 (Released 2025-10-06)
+## v0.3.2 (Released 2025-10-06)
 
 * Added `WriteFile` function to `Path` object
 
