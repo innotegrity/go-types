@@ -4,6 +4,12 @@
 
 No unreleased changes
 
+## v0.3.0 (Released 2025-10-06)
+
+* Added `Abs` function to `Path` object
+* Updated `Path` error constants
+* Renamed `WithErrAttrs` function to `Attrs` on for `Path` object and updated its signature
+
 ## v0.2.1 (Released 2025-10-06)
 
 * Updated to `go.innotegrity.dev/xerrors` version 0.3.1

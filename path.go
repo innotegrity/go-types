@@ -4,19 +4,40 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"go.innotegrity.dev/xerrors"
 )
 
 const (
-	PathChmodError    = 1
-	PathChownError    = 2
-	PathMkdirError    = 3
-	PathOpenFileError = 4
+	// PathError indicates there was a general error while working with the path.
+	PathError = 1
+
+	// PathChmodError indicates there was an error while changing the permissions of the path.
+	PathChmodError = 2
+
+	// PathChownError indicates there was an error while changing the ownership of the path.
+	PathChownError = 3
+
+	// PathCreateError indicates there was an error while creating the path.
+	PathCreateError = 4
+
+	// PathOpenFileError indicates there was an error while opening the file.
+	PathOpenFileError = 5
 )
 
 // Path holds settings for a particular file or folder.
 type Path struct {
+	// AutoChmod indicates if the permissions of the file or directory should be changed when creating or opening it.
+	AutoChmod bool `json:"auto_chmod" mapstructure:"auto_chmod"`
+
+	// AutoChown indicates if the ownership of the file or directory should be changed when creating or opening it.
+	AutoChown bool `json:"auto_chown" mapstructure:"auto_chown"`
+
+	// AutoCreateParent indicates if any parent folders should be created if they do not exist when creating oropening
+	// a file.
+	AutoCreateParent bool `json:"auto_create_parent" mapstructure:"auto_create_parent"`
+
 	// DirMode is the mode that should be used when creating the directory or any parent directories.
 	DirMode FileMode `json:"dir_mode" mapstructure:"dir_mode"`
 
@@ -33,25 +54,42 @@ type Path struct {
 	Owner UserID `json:"owner" mapstructure:"owner"`
 }
 
-// WithErrAttrs returns the given error with attributes from the path settings.
-func (p Path) WithErrAttrs(e xerrors.Error) xerrors.Error {
-	if e == nil {
-		return nil
+// Abs attempts to convert the filesystem path to an absolute path.
+//
+// This function may return an error with any of the following codes:
+//   - [PathError]
+func (p *Path) Abs() xerrors.Error {
+	path, err := filepath.Abs(p.FSPath)
+	if err != nil {
+		return xerrors.Wrapf(PathError, err, "failed to convert '%s' to an absolute path: %s", p.FSPath, err.Error()).
+			WithAttrs(map[string]any{
+				"path": p.FSPath,
+			})
 	}
-	return e.WithAttrs(map[string]any{
+	p.FSPath = path
+	return nil
+}
+
+// Attrs returns the attributes of the path which can be attached to errors or log messages.
+func (p Path) Attrs() map[string]any {
+	return map[string]any{
 		"dir_mode":  fmt.Sprintf("%o", p.DirMode),
 		"file_mode": fmt.Sprintf("%o", p.FileMode),
 		"group":     p.Group.String(),
 		"owner":     p.Owner.String(),
 		"path":      p.FSPath,
-	})
+	}
 }
 
 // Chmod sets the permissions on the path.
+//
+// This function may return an error with any of the following codes:
+//   - [PathChmodError]
+//   - [PathError]
 func (p Path) Chmod() xerrors.Error {
 	s, err := os.Stat(p.FSPath)
 	if err != nil {
-		return xerrors.Wrapf(PathChmodError, err, "failed to change permissions of '%s': %s", p.FSPath, err.Error()).
+		return xerrors.Wrapf(PathError, err, "failed to change permissions of '%s': %s", p.FSPath, err.Error()).
 			WithAttrs(map[string]any{
 				"path": p.FSPath,
 			})
@@ -71,6 +109,9 @@ func (p Path) Chmod() xerrors.Error {
 }
 
 // Chown sets the ownership for the path.
+//
+// This function may return an error with any of the following codes:
+//   - [PathChownError]
 func (p Path) Chown() xerrors.Error {
 	// only works for root
 	if os.Geteuid() != 0 {
@@ -88,10 +129,16 @@ func (p Path) Chown() xerrors.Error {
 }
 
 // MkdirAll creates the path and changes the ownership of the path if running as root.
+//
+// This function may return an error with any of the following codes:
+//   - [PathChmodError]
+//   - [PathChownError]
+//   - [PathCreateError]
+//   - [PathError]
 func (p Path) MkdirAll() xerrors.Error {
 	// create the folder
 	if err := os.MkdirAll(p.FSPath, p.DirMode.OSFileMode()); err != nil {
-		return xerrors.Wrapf(PathMkdirError, err, "failed to create path '%s': %s", p.FSPath, err.Error()).
+		return xerrors.Wrapf(PathCreateError, err, "failed to create path '%s': %s", p.FSPath, err.Error()).
 			WithAttrs(map[string]any{
 				"path":     p.FSPath,
 				"dir_mode": fmt.Sprintf("%o", p.DirMode),
@@ -99,16 +146,30 @@ func (p Path) MkdirAll() xerrors.Error {
 	}
 
 	// set ownership and permissions
-	if xerr := p.Chown(); xerr != nil {
-		return xerr
+	if p.AutoChmod {
+		if xerr := p.Chmod(); xerr != nil {
+			return xerr
+		}
 	}
-	return p.Chmod()
+	if p.AutoChown {
+		if xerr := p.Chown(); xerr != nil {
+			return xerr
+		}
+	}
+	return nil
 }
 
 // OpenFile creates/opens the file and changes the ownership of it if running as root.
-func (p Path) OpenFile(flags int, createParent bool) (*os.File, xerrors.Error) {
+//
+// This function may return an error with any of the following codes:
+//   - [PathChmodError]
+//   - [PathChownError]
+//   - [PathCreateError]
+//   - [PathError]
+//   - [PathOpenFileError]
+func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 	// create parent folder if desired
-	if createParent {
+	if p.AutoCreateParent {
 		parent := Path{
 			DirMode: p.DirMode,
 			Group:   p.Group,
@@ -132,13 +193,17 @@ func (p Path) OpenFile(flags int, createParent bool) (*os.File, xerrors.Error) {
 	}
 
 	// set ownership and permissions
-	if xerr := p.Chown(); xerr != nil {
-		file.Close()
-		return nil, xerr
+	if p.AutoChmod {
+		if xerr := p.Chmod(); xerr != nil {
+			file.Close()
+			return nil, xerr
+		}
 	}
-	if xerr := p.Chmod(); xerr != nil {
-		file.Close()
-		return nil, xerr
+	if p.AutoChown {
+		if xerr := p.Chown(); xerr != nil {
+			file.Close()
+			return nil, xerr
+		}
 	}
 	return file, nil
 }
