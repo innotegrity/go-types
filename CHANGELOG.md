@@ -4,6 +4,10 @@
 
 No unreleased changes
 
+## v0.2.1 (Released 2025-10-06)
+
+* Updated to `go.innotegrity.dev/xerrors` version 0.3.1
+
 ## v0.2.0 (Released 2025-10-06)
 
 * Modified error codes for `Path` object
