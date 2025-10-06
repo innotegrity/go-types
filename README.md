@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="128" src="./logo.png" alt="generic logo" />
+  <img width="128" src="./logo.png" alt="types logo" />
   <h1>go-types</h1>
   <p>A library of helpful data types for use with Go applications</p>
   <hr />
