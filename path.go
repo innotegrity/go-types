@@ -153,13 +153,13 @@ func (p Path) MkdirAll() xerrors.Error {
 
 	// set ownership and permissions
 	if p.AutoChmod {
-		if err := p.Chmod(); err != nil {
-			return err
+		if xerr := p.Chmod(); xerr != nil {
+			return xerr
 		}
 	}
 	if p.AutoChown {
-		if err := p.Chown(); err != nil {
-			return err
+		if xerr := p.Chown(); xerr != nil {
+			return xerr
 		}
 	}
 	return nil
@@ -185,12 +185,12 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 			Owner:   p.Owner,
 			FSPath:  path.Dir(p.FSPath),
 		}
-		if err := parent.MkdirAll(); err != nil {
-			return nil, xerrors.Wrapf(PathOpenFileError, err, "failed to open file '%s': %s", p.FSPath, err.Error()).
-				WithAttrs(map[string]any{
-					"file":      p.FSPath,
-					"file_mode": fmt.Sprintf("%o", p.FileMode),
-				})
+		if xerr := parent.MkdirAll(); xerr != nil {
+			return nil, xerrors.Wrapf(PathOpenFileError, xerr, "failed to open file '%s': %s", p.FSPath,
+				xerr.Error()).WithAttrs(map[string]any{
+				"file":      p.FSPath,
+				"file_mode": fmt.Sprintf("%o", p.FileMode),
+			})
 		}
 	}
 
@@ -206,15 +206,15 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 
 	// set ownership and permissions
 	if p.AutoChmod {
-		if err := p.Chmod(); err != nil {
+		if xerr := p.Chmod(); xerr != nil {
 			file.Close()
-			return nil, err
+			return nil, xerr
 		}
 	}
 	if p.AutoChown {
-		if err := p.Chown(); err != nil {
+		if xerr := p.Chown(); xerr != nil {
 			file.Close()
-			return nil, err
+			return nil, xerr
 		}
 	}
 	return file, nil
@@ -238,9 +238,9 @@ func (p Path) WriteFile(data []byte, overwrite bool) xerrors.Error {
 	} else {
 		flags |= os.O_APPEND
 	}
-	handle, err := p.OpenFile(flags)
-	if err != nil {
-		return err
+	handle, xerr := p.OpenFile(flags)
+	if xerr != nil {
+		return xerr
 	}
 	defer handle.Close()
 
