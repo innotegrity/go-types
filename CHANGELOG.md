@@ -4,6 +4,10 @@
 
 No unreleased changes
 
+## v0.3.1 (Released 2025-10-06)
+
+* Added `WriteFile` function to `Path` object
+
 ## v0.3.0 (Released 2025-10-06)
 
 * Added `Abs` function to `Path` object

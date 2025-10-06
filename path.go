@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -24,6 +25,9 @@ const (
 
 	// PathOpenFileError indicates there was an error while opening the file.
 	PathOpenFileError = 5
+
+	// PathWriteError indicates there was an error while writing to the file.
+	PathWriteError = 6
 )
 
 // Path holds settings for a particular file or folder.
@@ -128,7 +132,10 @@ func (p Path) Chown() xerrors.Error {
 	return nil
 }
 
-// MkdirAll creates the path and changes the ownership of the path if running as root.
+// MkdirAll creates the given path and any parent folders if they do not exist.
+//
+// If [Path.AutoChmod] is true, the permissions will be set to the [Path.DirMode] value.
+// If [Path.AutoChown] is true, the ownership will be set to the [Path.Owner] and [Path.Group] values.
 //
 // This function may return an error with any of the following codes:
 //   - [PathChmodError]
@@ -147,24 +154,27 @@ func (p Path) MkdirAll() xerrors.Error {
 
 	// set ownership and permissions
 	if p.AutoChmod {
-		if xerr := p.Chmod(); xerr != nil {
-			return xerr
+		if err := p.Chmod(); err != nil {
+			return err
 		}
 	}
 	if p.AutoChown {
-		if xerr := p.Chown(); xerr != nil {
-			return xerr
+		if err := p.Chown(); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-// OpenFile creates/opens the file and changes the ownership of it if running as root.
+// OpenFile creates/opens the file and returns its handle.
+//
+// If [Path.AutoCreateParent] is true, [Path.MkdirAll] will be called on the file's parent folder first.
+// If [Path.AutoChmod] is true, the permissions will be set to the [Path.DirMode] value.
+// If [Path.AutoChown] is true, the ownership will be set to the [Path.Owner] and [Path.Group] values.
 //
 // This function may return an error with any of the following codes:
 //   - [PathChmodError]
 //   - [PathChownError]
-//   - [PathCreateError]
 //   - [PathError]
 //   - [PathOpenFileError]
 func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
@@ -176,8 +186,12 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 			Owner:   p.Owner,
 			FSPath:  path.Dir(p.FSPath),
 		}
-		if xerr := parent.MkdirAll(); xerr != nil {
-			return nil, xerr
+		if err := parent.MkdirAll(); err != nil {
+			return nil, xerrors.Wrapf(PathOpenFileError, err, "failed to open file '%s': %s", p.FSPath, err.Error()).
+				WithAttrs(map[string]any{
+					"file":      p.FSPath,
+					"file_mode": fmt.Sprintf("%o", p.FileMode),
+				})
 		}
 	}
 
@@ -189,21 +203,51 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 				"file":      p.FSPath,
 				"file_mode": fmt.Sprintf("%o", p.FileMode),
 			})
-
 	}
 
 	// set ownership and permissions
 	if p.AutoChmod {
-		if xerr := p.Chmod(); xerr != nil {
+		if err := p.Chmod(); err != nil {
 			file.Close()
-			return nil, xerr
+			return nil, err
 		}
 	}
 	if p.AutoChown {
-		if xerr := p.Chown(); xerr != nil {
+		if err := p.Chown(); err != nil {
 			file.Close()
-			return nil, xerr
+			return nil, err
 		}
 	}
 	return file, nil
+}
+
+// WriteFile writes the given data the file.
+//
+// This function uses the [Path.OpenFile] function to create/open the file before writing to it. It automatically
+// closes the file after writing to it.
+//
+// This function may return an error with any of the following codes:
+//   - [PathChmodError]
+//   - [PathChownError]
+//   - [PathError]
+//   - [PathOpenFileError]
+//   - [PathWriteError]
+func (p Path) WriteFile(ctx context.Context, data []byte, overwrite bool) xerrors.Error {
+	flags := os.O_CREATE | os.O_RDWR
+	if overwrite {
+		flags |= os.O_TRUNC
+	} else {
+		flags |= os.O_APPEND
+	}
+	handle, err := p.OpenFile(flags)
+	if err != nil {
+		return err
+	}
+	defer handle.Close()
+
+	if _, err := handle.Write(data); err != nil {
+		return xerrors.Wrapf(PathWriteError, err, "failed to write to file '%s': %s", p.FSPath, err.Error()).
+			WithAttr("file", p.FSPath)
+	}
+	return nil
 }
