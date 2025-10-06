@@ -4,6 +4,10 @@
 
 No unreleased changes
 
+## v0.3.3 (Released 2025-10-06)
+
+* Updated to `go.innotegrity.dev/xerrors` version 0.3.2
+
 ## v0.3.2 (Released 2025-10-06)
 
 * Added `WriteFile` function to `Path` object
