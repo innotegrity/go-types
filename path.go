@@ -32,29 +32,29 @@ const (
 // Path holds settings for a particular file or folder.
 type Path struct {
 	// AutoChmod indicates if the permissions of the file or directory should be changed when creating or opening it.
-	AutoChmod bool `json:"auto_chmod" mapstructure:"auto_chmod"`
+	AutoChmod bool `json:"auto_chmod" yaml:"auto_chmod" mapstructure:"auto_chmod"`
 
 	// AutoChown indicates if the ownership of the file or directory should be changed when creating or opening it.
-	AutoChown bool `json:"auto_chown" mapstructure:"auto_chown"`
+	AutoChown bool `json:"auto_chown" yaml:"auto_chown" mapstructure:"auto_chown"`
 
 	// AutoCreateParent indicates if any parent folders should be created if they do not exist when creating oropening
 	// a file.
-	AutoCreateParent bool `json:"auto_create_parent" mapstructure:"auto_create_parent"`
+	AutoCreateParent bool `json:"auto_create_parent" yaml:"auto_create_parent" mapstructure:"auto_create_parent"`
 
 	// DirMode is the mode that should be used when creating the directory or any parent directories.
-	DirMode FileMode `json:"dir_mode" mapstructure:"dir_mode"`
+	DirMode FileMode `json:"dir_mode" yaml:"dir_mode" mapstructure:"dir_mode"`
 
 	// FileMode is the mode that should be used when creating the file.
-	FileMode FileMode `json:"file_mode" mapstructure:"file_mode"`
+	FileMode FileMode `json:"file_mode" yaml:"file_mode" mapstructure:"file_mode"`
 
 	// FSPath is the path to the file or directory on the filesystem.
-	FSPath string `json:"path" mapstructure:"path"`
+	FSPath string `json:"path" yaml:"path" mapstructure:"path"`
 
 	// Group is the group name or ID that should own the file or directory.
-	Group GroupID `json:"group" mapstructure:"group"`
+	Group GroupID `json:"group" yaml:"group" mapstructure:"group"`
 
 	// Owner is the user name or ID that should own the file or directory.
-	Owner UserID `json:"owner" mapstructure:"owner"`
+	Owner UserID `json:"owner" yaml:"owner" mapstructure:"owner"`
 }
 
 // Abs attempts to convert the filesystem path to an absolute path.

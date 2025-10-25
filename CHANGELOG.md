@@ -4,6 +4,11 @@
 
 No unreleased changes
 
+## v0.3.4 (Released 2025-10-25)
+
+* Updated to `go.innotegrity.dev/xerrors` version 0.3.3
+* Added `json`, `yaml` and `mapstructure` tags to `Path`, `CredentialSecret` and `GenericSecret` members
+
 ## v0.3.3 (Released 2025-10-06)
 
 * Updated to `go.innotegrity.dev/xerrors` version 0.3.2

@@ -32,10 +32,10 @@ import (
 // Note that once a secret has been marshaled, it can no longer be unmarshalled back to its original value.
 type CredentialSecret struct {
 	// Password holds the password portion of the credentials.
-	Password string `json:"password" yaml:"password"`
+	Password string `json:"password" yaml:"password" mapstructure:"password"`
 
 	// Username holds the user portion of the credentials.
-	Username string `json:"username" yaml:"username"`
+	Username string `json:"username" yaml:"username" mapstructure:"username"`
 }
 
 // jsonCredentialSecret is just an alias for [CredentialSecret] that is used during marshalling and unmarshalling to
@@ -187,7 +187,7 @@ func (s *CredentialSecret) UnmarshalText(data []byte) error {
 // Note that once a secret has been marshaled, it can no longer be unmarshalled back to its original value.
 type GenericSecret struct {
 	// Data is the actual secret data.
-	Data []byte `json:"data" yaml:"data"`
+	Data []byte `json:"data" yaml:"data" mapstructure:"data"`
 }
 
 // jsonGenericSecret is just an alias for [GenericSecret] that is used during marshalling and unmarshalling to
