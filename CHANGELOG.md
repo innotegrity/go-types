@@ -4,6 +4,10 @@
 
 No unreleased changes
 
+## v0.3.5 (Released 2025-10-28)
+
+* Added `Duration` type
+
 ## v0.3.4 (Released 2025-10-25)
 
 * Updated to `go.innotegrity.dev/xerrors` version 0.3.3
