@@ -4,7 +4,7 @@
 
 No unreleased changes
 
-## v0.3.5 (Released 2025-10-28)
+## v0.4.0 (Released 2025-10-28)
 
 * Added `Duration` type
 
