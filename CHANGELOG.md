@@ -4,6 +4,11 @@
 
 No unreleased changes
 
+## v0.5.0 (Released 2025-10-30)
+
+* Renamed `CredentialSecret` to `UsernamePasswordSecret`
+* Updated supported secret formats and added support for AWS Secrets Manager secrets and environment variable secrets
+
 ## v0.4.1 (Released 2025-10-29)
 
 * Updated to `go.innotegrity.dev/xerrors` version 0.3.4
