@@ -21,12 +21,9 @@ import (
 func randomString(length int) string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
-
 	sb := strings.Builder{}
 	sb.Grow(length)
-	for i := 0; i < length; i++ {
+	for range length {
 		sb.WriteByte(charset[rand.Intn(len(charset))])
 	}
 	return sb.String()
