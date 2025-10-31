@@ -59,8 +59,9 @@ type jsonUsernamePasswordSecret UsernamePasswordSecret
 // If an empty string is supplied, an empty set of credentials is returned.
 //
 // This function may return an error with any of the following codes:
-//   - [ParseSecretError]
-//   - [SecretProviderError]
+//   - [ParseSecretError]: there was an error parsing the secret string
+//   - [SecretProviderError]: there was a general error with a backend provider where a secret is stored
+//     (eg: AWS, GCP, etc.)
 func ParseUsernamePasswordSecret(ctx context.Context, secret string) (UsernamePasswordSecret, xerrors.Error) {
 	var creds UsernamePasswordSecret
 
@@ -292,8 +293,9 @@ type jsonGenericSecret GenericSecret
 // If an empty string is supplied, an empty secret is returned.
 //
 // This function may return an error with any of the following codes:
-//   - [ParseSecretError]
-//   - [SecretProviderError]
+//   - [ParseSecretError]: There was an error parsing the secret string
+//   - [SecretProviderError]: There was a general error with a backend provider where a secret is stored
+//     (eg: AWS, GCP, etc.)
 func ParseGenericSecret(ctx context.Context, secret string) (GenericSecret, error) {
 	var secretData GenericSecret
 

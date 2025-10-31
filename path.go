@@ -40,7 +40,7 @@ type Path struct {
 // Abs attempts to convert the filesystem path to an absolute path.
 //
 // This function may return an error with any of the following codes:
-//   - [PathError]
+//   - [PathError]: there was a general error while working with the path
 func (p *Path) Abs() xerrors.Error {
 	path, err := filepath.Abs(p.FSPath)
 	if err != nil {
@@ -67,8 +67,8 @@ func (p Path) Attrs() map[string]any {
 // Chmod sets the permissions on the path.
 //
 // This function may return an error with any of the following codes:
-//   - [PathChmodError]
-//   - [PathError]
+//   - [PathChmodError]: there was an error while changing the permissions on the file/folder
+//   - [PathError]: there was a general error while working with the path
 func (p Path) Chmod() xerrors.Error {
 	s, err := os.Stat(p.FSPath)
 	if err != nil {
@@ -94,7 +94,7 @@ func (p Path) Chmod() xerrors.Error {
 // Chown sets the ownership for the path.
 //
 // This function may return an error with any of the following codes:
-//   - [PathChownError]
+//   - [PathChownError]: there was an error while changing ownership of the file/folder
 func (p Path) Chown() xerrors.Error {
 	// only works for root
 	if os.Geteuid() != 0 {
@@ -117,10 +117,10 @@ func (p Path) Chown() xerrors.Error {
 // If [Path.AutoChown] is true, the ownership will be set to the [Path.Owner] and [Path.Group] values.
 //
 // This function may return an error with any of the following codes:
-//   - [PathChmodError]
-//   - [PathChownError]
-//   - [PathCreateError]
-//   - [PathError]
+//   - [PathChmodError]: there was an error while changing the permissions on the folder
+//   - [PathChownError]: there was an error while changing ownership of the folder
+//   - [PathCreateError]: there was an error while creating the folder
+//   - [PathError]: there was a general error while working with the path
 func (p Path) MkdirAll() xerrors.Error {
 	// create the folder
 	if err := os.MkdirAll(p.FSPath, p.DirMode.OSFileMode()); err != nil {
@@ -152,10 +152,11 @@ func (p Path) MkdirAll() xerrors.Error {
 // If [Path.AutoChown] is true, the ownership will be set to the [Path.Owner] and [Path.Group] values.
 //
 // This function may return an error with any of the following codes:
-//   - [PathChmodError]
-//   - [PathChownError]
-//   - [PathError]
-//   - [PathOpenFileError]
+//   - [PathChmodError]: there was an error while changing the permissions on the file/parent folder
+//   - [PathChownError]: there was an error while changing ownership of the file/parent folder
+//   - [PathCreateError]: there was an error while creating the parent folder
+//   - [PathError]: there was a general error while working with the path
+//   - [PathOpenFileError]: there was an error while opening the file
 func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 	// create parent folder if desired
 	if p.AutoCreateParent {
@@ -206,11 +207,12 @@ func (p Path) OpenFile(flags int) (*os.File, xerrors.Error) {
 // closes the file after writing to it.
 //
 // This function may return an error with any of the following codes:
-//   - [PathChmodError]
-//   - [PathChownError]
-//   - [PathError]
-//   - [PathOpenFileError]
-//   - [PathWriteError]
+//   - [PathChmodError]: there was an error while changing the permissions on the file/parent folder
+//   - [PathChownError]: there was an error while changing ownership of the file/parent folder
+//   - [PathCreateError]: there was an error while creating the parent folder
+//   - [PathError]: there was a general error while working with the path
+//   - [PathOpenFileError]: there was an error while opening the file
+//   - [PathWriteError]: there was an error while writing to the file
 func (p Path) WriteFile(data []byte, overwrite bool) xerrors.Error {
 	flags := os.O_CREATE | os.O_RDWR
 	if overwrite {
