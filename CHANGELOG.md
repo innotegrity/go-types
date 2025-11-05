@@ -4,6 +4,10 @@
 
 No unreleased changes
 
+## v0.6.0 (Released 2025-11-05)
+
+* Removed `GenericSecret` and `CredentialSecret` -- use the new `go.innotegrity.dev/secretmgr` package instead
+
 ## v0.5.0 (Released 2025-10-30)
 
 * Renamed `CredentialSecret` to `UsernamePasswordSecret`
