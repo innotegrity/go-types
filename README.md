@@ -26,7 +26,7 @@
 
 `go-types` provides a set of helpful data types that can be utilized across Go applications and other packages.
 
-Please review the [module documentation](https://pkg.go.dev/go.innotegrity.dev/types) for details on how to properly the functions and classes contained in this module.
+Please review the [module documentation](https://pkg.go.dev/go.innotegrity.dev/types) for details on how to properly the functions and types contained in this module.
 
 ## ✅ Requirements
 
