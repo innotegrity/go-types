@@ -18,15 +18,4 @@ const (
 
 	// PathWriteError indicates there was an error while writing to the file.
 	PathWriteError = 6
-
-	// UnsupportedSecretProtocolError indicates that an unknown/unsupported protocol was specified when attempting
-	// to decode/unmarshal a secret.
-	UnsupportedSecretProtocolError = 10
-
-	// ParseSecretError indicates that there was an error parsing a secret's value.
-	ParseSecretError = 11
-
-	// SecretProviderError indicates there was a general error with a backend provider where a secret is
-	// stored (eg: AWS, GCP, etc.).
-	SecretProviderError = 12
 )
