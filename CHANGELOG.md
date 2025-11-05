@@ -4,9 +4,11 @@
 
 No unreleased changes
 
-## v0.6.0 (Released 2025-11-05)
+## v0.7.0 (Released 2025-11-05)
 
 * Removed `GenericSecret` and `CredentialSecret` -- use the new `go.innotegrity.dev/secretmgr` package instead
+* Updated required `go` version to `1.23.1`
+* Updated to `go.innotegrity.dev/xerrors` version 0.4.0
 
 ## v0.5.0 (Released 2025-10-30)
 
